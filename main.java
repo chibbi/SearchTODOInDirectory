@@ -7,36 +7,43 @@ import java.util.Scanner;
 class main {
 
     public static void main(String[] args) {
-        String[] Files = getFiles(args[0]);
-        for (String one : Files) {
-            String[] Lines = ReadFile(new File(one));
-            int i = 0;
-            for (String two : Lines) {
-                if(two != "" && two != null && i != 0) {
-                    if(two.contains("TODO:")) {
-                        System.out.print("\u001B[31m");
-                        System.out.println(two.strip());
-                        System.out.print("\u001B[0m");
-                    }
-                } else if(i == 0) {
-                    System.out.println(two);
-                }
-                i++;
-            }
-        }
+        String[] Files = getAllFiles(new File(args[0]), "-");
+        ParseFile(Files);
     }
 
-    public static String[] getFiles(String Path) {
+    public static String[] getFiles(File f, String Recs) {
         String[] pathnames = null;
-        File f = new File(Path);
         pathnames = f.list();
+        int i = 0;
+        for (String two : pathnames) {
+            pathnames[i] = f + "/" + two;
+            i++;
+        }
         return pathnames;
     }
 
-    public static String StringOutOfArray(String[] Array) {
+    public static String[] getAllFiles(File f, String Recs) {
+        String[] pathnames = null;
+        pathnames = f.list();
+        int i = 0;
+        for (String two : pathnames) {
+            File fi = new File(f + "/" + two);
+            if (fi.isDirectory()) {
+                pathnames[i] = StringOutOfArray(getAllFiles(fi, Recs + "-"));
+            } else {
+                pathnames[i] = f + "/" + two;
+                // System.out.print(Recs);
+                // System.out.println(f + "/" + two + "/");
+            }
+            i++;
+        }
+        return pathnames;
+    }
+
+    public static String StringOutOfArray(String[] fis) {
         StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < Array.length; i++) {
-            sb.append("[" + Array[i] + "] ");
+        for (int i = 0; i < fis.length; i++) {
+            sb.append("[" + fis[i] + "] ");
         }
         String str = sb.toString();
         return str;
@@ -45,7 +52,7 @@ class main {
     public static String[] ReadFile(File fi) {
         List<String> Lines = new ArrayList<String>();
         Scanner myReader;
-        Lines.add("\u001B[35m" + fi.getName() + "\u001B[0m");
+        Lines.add(fi.getName());
         try {
             myReader = new Scanner(fi);
             while (myReader.hasNextLine()) {
@@ -55,10 +62,39 @@ class main {
             myReader.close();
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            // System.err.println(e.getMessage());
         }
-        String[] str = {"Some","Array"};
+        String[] str = { "Some", "Array" };
         return Lines.toArray(str);
     }
 
-}
+    public static void ParseFile(String[] Files) {
+        //System.out.println(Files[2]);
+        for (int i=0;i<Files.length;i++) {
+            //System.out.println(Files[i]);
+            if (new File(Files[i]).isDirectory()) {
+                System.out.println("1");
+                break;
+            }
+            String[] Fis = Files[i].split(" ");
+            if(Fis.length < 2) {
+                Files[i] = Files[i].replace("[", "").replace("]", "");
+                String[] Lines = ReadFile(new File(Files[i]));
+                for (String two : Lines) {
+                    if (two != "" && two != null) {
+                        if (two.contains("TODO:")) {
+                            System.out.print("\u001B[35m");
+                            System.out.println(Files[i]);
+                            System.out.print("\u001B[0m");
+                            System.out.print("\u001B[31m");
+                            System.out.println(two.strip());
+                            System.out.print("\u001B[0m");
+                        }
+                    }
+                }
+            } else if (Files[i].contains("[") && Files[i].contains("]") && Fis.length >= 2) {
+                System.out.println("3");
+                ParseFile(Fis);
+            }
+        }
+}}
