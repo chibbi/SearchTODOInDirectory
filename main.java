@@ -69,31 +69,34 @@ class main {
     }
 
     public static void ParseFile(String[] Files) {
-        //System.out.println(Files[2]);
         for (int i=0;i<Files.length;i++) {
-            //System.out.println(Files[i]);
             if (new File(Files[i]).isDirectory()) {
-                System.out.println("1");
-                break;
+                //System.out.println("1");
+                continue;
             }
             String[] Fis = Files[i].split(" ");
             if(Fis.length < 2) {
                 Files[i] = Files[i].replace("[", "").replace("]", "");
-                String[] Lines = ReadFile(new File(Files[i]));
-                for (String two : Lines) {
-                    if (two != "" && two != null) {
-                        if (two.contains("TODO:")) {
-                            System.out.print("\u001B[35m");
-                            System.out.println(Files[i]);
-                            System.out.print("\u001B[0m");
-                            System.out.print("\u001B[31m");
-                            System.out.println(two.strip());
-                            System.out.print("\u001B[0m");
+                if (Files[i].contains("node_modules")) {
+                    //System.out.println("2");
+                    continue;
+                } else {
+                    String[] Lines = ReadFile(new File(Files[i]));
+                    for (String two : Lines) {
+                        if (two != "" && two != null) {
+                            if (two.contains("TODO:")) {
+                                System.out.print("\u001B[35m");
+                                System.out.println(Files[i]);
+                                System.out.print("\u001B[0m");
+                                System.out.print("\u001B[31m");
+                                System.out.println(two.strip());
+                                System.out.print("\u001B[0m");
+                            }
                         }
                     }
                 }
             } else if (Files[i].contains("[") && Files[i].contains("]") && Fis.length >= 2) {
-                System.out.println("3");
+                //System.out.println("3");
                 ParseFile(Fis);
             }
         }
